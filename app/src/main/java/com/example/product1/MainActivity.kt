@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -45,22 +46,50 @@ class MainActivity : ComponentActivity() {
 val red = Color(0xFFE74F42)
 val LightBlue = Color(0xFFEBF5FF)
 
+data class review(
+    val user: String,
+    val rating: Int,
+    val comment: String
+
+)
 // Data class sản phẩm
 data class Product(
     val id: Int,
     val name: String,
-    val price: Double,
+    val price: Int,
     val imageRes: Int,
-    val description: String
+    val description: String,
+    val reviews: List<review> = emptyList()
+)
+val sampleProducts = listOf(
+    Product(
+        1, "Áo phông siu vip", 500000, R.drawable.t_shirt, "95% Cotton, 5% Spandex.",
+        listOf(
+            review("Nghia", 5, "Sản phẩm tuyệt vời!"),
+            review("Linh", 4, "Chất lượng tốt."),
+            review("Nghia tran", 3, "Tạm ổn, hơi rộng.")
+        )
+    ),
+    Product(
+        2, "Áo tay ngắn cho nữ", 499000, R.drawable.short_sleeve, "100% Polyester. Machine wash.",
+        listOf(
+            review("Trang", 5, "Thoải mái, phù hợp với giá tiền."),
+            review("Linh", 4, "Màu đẹp nhưng hơi mỏng.")
+        )
+    ),
+    Product(3, "Quần ngắn", 199000, R.drawable.solid_short, "95% RAYON, 5% SPANDEX."),
+    Product(4, "Áo mưa", 799000, R.drawable.rain_jacket_women, "Lightweight, perfect for travel.")
+
 )
 
+
 // Danh sách sản phẩm mẫu
-val sampleProducts = listOf(
-    Product(1, "DANVOUY Womens T Shirt", 12.99, R.drawable.t_shirt, "95% Cotton, 5% Spandex."),
-    Product(2, "Opna Women's Short Sleeve", 15.99, R.drawable.short_sleeve, "100% Polyester. Machine wash."),
-    Product(3, "MBJ Women's Solid Short", 20.99, R.drawable.solid_short, "95% RAYON, 5% SPANDEX."),
-    Product(4, "Rain Jacket Women", 25.99, R.drawable.rain_jacket_women, "Lightweight, perfect for travel.")
-)
+//val sampleProducts = listOf(
+//    Product(1, "DANVOUY Womens T Shirt", 12.99, R.drawable.t_shirt, "95% Cotton, 5% Spandex."),
+//    Product(2, "Opna Women's Short Sleeve", 15.99, R.drawable.short_sleeve, "100% Polyester. Machine wash."),
+//    Product(3, "MBJ Women's Solid Short", 20.99, R.drawable.solid_short, "95% RAYON, 5% SPANDEX."),
+//    Product(4, "Rain Jacket Women", 25.99, R.drawable.rain_jacket_women, "Lightweight, perfect for travel.")
+//)
 
 @Composable
 fun MainScreen() {
@@ -165,7 +194,7 @@ fun ProductItem(product: Product, navController: NavController) {
             Spacer(modifier = Modifier.height(4.dp))
 
             Text(
-                text = "$${product.price}",
+                text = "${product.price}đ",
                 fontSize = 14.sp,
                 color = red
             )
@@ -216,12 +245,7 @@ fun ProductDetailScreen(navController: NavController, product: Product) {
             )
             Spacer(modifier = Modifier.height(16.dp))
 
-            Text(
-                text = product.name,
-                fontSize = 20.sp,
-                fontWeight = FontWeight.Bold,
-                color = red
-            )
+            Text(text = product.name, fontSize = 20.sp, fontWeight = FontWeight.Bold, color = red)
             Spacer(modifier = Modifier.height(8.dp))
 
             Text(text = product.description, fontSize = 16.sp)
@@ -234,9 +258,50 @@ fun ProductDetailScreen(navController: NavController, product: Product) {
             ) {
                 Text(text = "Mua ngay", color = Color.White)
             }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Hiển thị danh sách đánh giá
+            Text(text = "Đánh giá sản phẩm", fontSize = 18.sp, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            LazyColumn {
+                items(product.reviews) { review ->
+                    ReviewItem(review)
+                }
+            }
         }
     }
 }
+
+// Composable để hiển thị mỗi đánh giá
+@Composable
+fun ReviewItem(review: review) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp),
+        shape = RoundedCornerShape(8.dp),
+        colors = CardDefaults.cardColors(containerColor = LightBlue),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Column(modifier = Modifier.padding(12.dp)) {
+            Text(text = review.user, fontWeight = FontWeight.Bold)
+            Spacer(modifier = Modifier.height(4.dp))
+
+            // Hiển thị số sao
+            Row {
+                repeat(review.rating) {
+                    Icon(imageVector = Icons.Default.Star, contentDescription = "Star", tint = Color.Yellow)
+                }
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+
+            Text(text = review.comment)
+        }
+    }
+}
+
 
 @Preview(showBackground = true)
 @Composable
